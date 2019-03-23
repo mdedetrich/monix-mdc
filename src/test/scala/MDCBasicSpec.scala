@@ -34,7 +34,7 @@ class MDCBasicSpec extends AsyncWordSpec with Matchers with InitializeMDC with B
   "Task with MDC" can {
     "Write and get a value" in {
       val task = getAndPut(keyValue, putValue)
-      task.runToFuture.map { _ shouldBe putValue }
+      task.runToFutureOpt.map { _ shouldBe putValue }
     }
 
     "Write and get different values concurrently" in {
@@ -44,7 +44,7 @@ class MDCBasicSpec extends AsyncWordSpec with Matchers with InitializeMDC with B
           getAndPut(key2Value, put2Value).executeAsync
         ))
 
-      task.runToFuture.map {
+      task.runToFutureOpt.map {
         case List(one, two) =>
           one shouldBe put1Value
           two shouldBe put2Value
@@ -58,7 +58,7 @@ class MDCBasicSpec extends AsyncWordSpec with Matchers with InitializeMDC with B
           getAndPut(keyValue, put2Value).executeAsync
         ))
 
-      task.runToFuture.map {
+      task.runToFutureOpt.map {
         case List(one, two) =>
           one shouldBe put1Value
           two shouldBe put2Value

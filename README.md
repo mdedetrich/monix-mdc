@@ -27,7 +27,7 @@ libraryDependencies ++= List(
 Firstly in order to use Monix Task you need to enable `TaskLocal` in your
 `Task`, there are multiple ways to do this
 
-* You can import the `Task.defaultOptions.enableLocalContextPropagation` implicit where you do `runToFuture`
+* You can import the `Task.defaultOptions.enableLocalContextPropagation` implicit and use `runToFutureOpt`
 * Applying a transformation `.executeWithOptions(_.enableLocalContextPropagation)` on each Task that uses a Local
 * Setting system property `monix.environment.localContextPropagation` to 1
 

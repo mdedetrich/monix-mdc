@@ -36,7 +36,7 @@ class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC with 
               }
       } yield get
 
-      task.runToFuture.map { _ shouldBe putValue }
+      task.runToFutureOpt.map { _ shouldBe putValue }
     }
 
     "Write with Future and get in Task" in {
@@ -50,7 +50,7 @@ class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC with 
                 MDC.get(keyValue)
               }
       } yield get
-      task.runToFuture.map { _ shouldBe putValue }
+      task.runToFutureOpt.map { _ shouldBe putValue }
     }
 
     "Write and get different values concurrently and mixed with Future first" in {
@@ -72,7 +72,7 @@ class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC with 
           getAndPut(keyValue, put2Value).executeAsync
         ))
 
-      task.runToFuture.map {
+      task.runToFutureOpt.map {
         case List(one, two) =>
           one shouldBe put1Value
           two shouldBe put2Value
@@ -98,7 +98,7 @@ class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC with 
           getAndPut(keyValue, put2Value).executeAsync
         ))
 
-      task.runToFuture.map {
+      task.runToFutureOpt.map {
         case List(one, two) =>
           one shouldBe put1Value
           two shouldBe put2Value
