@@ -1,59 +1,53 @@
 import monix.eval.Task
 import monix.execution.schedulers.TracingScheduler
-import org.scalactic.source.Position
-import org.scalatest.{AsyncWordSpec, BeforeAndAfter, Matchers}
+import org.scalatest.{AsyncWordSpec, Matchers}
 import org.slf4j.MDC
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC with BeforeAndAfter {
-  implicit val scheduler: TracingScheduler = TracingScheduler(ExecutionContext.global)
-  implicit val opts: Task.Options          = Task.defaultOptions.enableLocalContextPropagation
-
-  val keyValue  = "key"
-  val putValue  = "value"
-  val key1Value = "key1"
-  val put1Value = "value1"
-  val key2Value = "key2"
-  val put2Value = "value2"
-
-  override def after(fun: => Any)(implicit pos: Position): Unit = {
-    MDC.remove(keyValue)
-    MDC.remove(key1Value)
-    MDC.remove(key2Value)
-  }
+class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC {
+  implicit val scheduler: TracingScheduler        = TracingScheduler(ExecutionContext.global)
+  override def executionContext: ExecutionContext = scheduler
+  implicit val opts: Task.Options                 = Task.defaultOptions.enableLocalContextPropagation
 
   "Mixing Task with Future" can {
     "Write with Task and get in Future" in {
+      val keyValue = KeyValue.keyValueGenerator.sample.get
+
       val task = for {
         _ <- Task {
-              MDC.put(keyValue, putValue)
+              MDC.put(keyValue.key, keyValue.value)
             }
         get <- Task.fromFuture {
                 Future {
-                  MDC.get(keyValue)
+                  MDC.get(keyValue.key)
                 }
               }
       } yield get
 
-      task.runToFutureOpt.map { _ shouldBe putValue }
+      task.runToFutureOpt.map { _ shouldBe keyValue.value }
     }
 
     "Write with Future and get in Task" in {
+      val keyValue = KeyValue.keyValueGenerator.sample.get
+
       val task = for {
         _ <- Task.deferFuture {
               Future {
-                MDC.put(keyValue, putValue)
+                MDC.put(keyValue.key, keyValue.value)
               }
             }
         get <- Task {
-                MDC.get(keyValue)
+                MDC.get(keyValue.key)
               }
       } yield get
-      task.runToFutureOpt.map { _ shouldBe putValue }
+
+      task.runToFutureOpt.map { _ shouldBe keyValue.value }
     }
 
     "Write and get different values concurrently and mixed with Future first" in {
+      val keyMultipleValues = KeyMultipleValues.keyMultipleValuesGenerator.sample.get
+
       def getAndPut(key: String, value: String): Task[String] =
         for {
           _ <- Task.deferFuture {
@@ -66,20 +60,20 @@ class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC with 
                 }
         } yield get
 
-      val task = Task.gather(
-        List(
-          getAndPut(keyValue, put1Value).executeAsync,
-          getAndPut(keyValue, put2Value).executeAsync
-        ))
+      val tasks = keyMultipleValues.values.map { value =>
+        getAndPut(keyMultipleValues.key, value).executeAsync
+      }
 
-      task.runToFutureOpt.map {
-        case List(one, two) =>
-          one shouldBe put1Value
-          two shouldBe put2Value
+      val task = Task.gather(tasks)
+
+      task.runToFutureOpt.map { retrievedValues =>
+        retrievedValues shouldBe keyMultipleValues.values
       }
     }
 
     "Write and get different values concurrently and mixed with Future second" in {
+      val keyMultipleValues = KeyMultipleValues.keyMultipleValuesGenerator.sample.get
+
       def getAndPut(key: String, value: String): Task[String] =
         for {
           _ <- Task {
@@ -92,16 +86,14 @@ class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC with 
                 }
         } yield get
 
-      val task = Task.gather(
-        List(
-          getAndPut(keyValue, put1Value).executeAsync,
-          getAndPut(keyValue, put2Value).executeAsync
-        ))
+      val tasks = keyMultipleValues.values.map { value =>
+        getAndPut(keyMultipleValues.key, value).executeAsync
+      }
 
-      task.runToFutureOpt.map {
-        case List(one, two) =>
-          one shouldBe put1Value
-          two shouldBe put2Value
+      val task = Task.gather(tasks)
+
+      task.runToFutureOpt.map { retrievedValues =>
+        retrievedValues shouldBe keyMultipleValues.values
       }
     }
   }
