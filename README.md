@@ -4,10 +4,10 @@ Monix MDC provides support for [MDC](https://logback.qos.ch/manual/mdc.html)
 when using [Monix Task](https://monix.io/). This allows you to use `MDC.put`
 as well as `MDC.get` when working within a `Task` and have it correctly propagated.
 Monix's own `Task` `Local` is used to achieve this, which is the equivalent of a `ThreadLocal`
-but for `Task`.
+but has better handling of scope.
 
 You can also mix scala `Future` along with Monix `Task` if you use `TracingScheduler`
-which propagates Monix's `Task` `Local` over async boundaris.
+which propagates Monix's `Local` over async boundaries.
 
 The initial code was taken from [Oleg Pyzhcov's blog post](https://olegpy.com/better-logging-monix-1/)
 so credit goes to him for the initial implementation.
@@ -44,16 +44,7 @@ Monix `TracingScheduler` which means that you can freely use MDC both within `Ta
 You just need to make sure that you use the same `TracingScheduler` for all `Future` operations
 (as well as when running `runToFuture` on your `Task`)
 
-## Limitations
-
-The current implementation of monix-mdc overrides the `MDCAdapter` from
-the default one to the `MonixMDCAdapter`. Since `MonixMDCAdapter` doesn't
-use `ThreadLocal` at all, this will prevent MDC propagation via threads
-(which is the standard behaviour). If you have software that relies on this, it
-will break.
-
-Note that its theoretically possible to overcome this limitation by also reading
-from `ThreadLocal` when passing the map context over.
+## Further work
 
 Some optimizations may also be possible by preventing unnecessary copying of the
 `TaskLocal` map if nothing has been changed (i.e. if you don't do `MDC.put` there
