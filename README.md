@@ -43,9 +43,3 @@ If you want to interopt with MDC usage within Scala `Future` you can also use th
 Monix `TracingScheduler` which means that you can freely use MDC both within `Task` or `Future`.
 You just need to make sure that you use the same `TracingScheduler` for all `Future` operations
 (as well as when running `runToFuture` on your `Task`)
-
-## Further work
-
-Some optimizations may also be possible by preventing unnecessary copying of the
-`TaskLocal` map if nothing has been changed (i.e. if you don't do `MDC.put` there
-is no point in copying the context) 
