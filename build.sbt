@@ -1,4 +1,5 @@
 val currentScalaVersion = "2.11.12"
+val monixVersion        = "3.0.0-RC2-SNAPSHOT-9e79718-SNAPSHOT"
 
 name := "monix-mdc"
 
@@ -39,10 +40,11 @@ publishArtifact in Test := false
 pomIncludeRepository := (_ => false)
 
 libraryDependencies := Seq(
-  "io.monix"       %% "monix"          % "3.0.0-RC2-SNAPSHOT-9e79718-SNAPSHOT",
-  "ch.qos.logback" % "logback-classic" % "1.2.3",
-  "org.scalatest"  %% "scalatest"      % "3.0.5" % Test,
-  "org.scalacheck" %% "scalacheck"     % "1.14.0" % Test
+  "io.monix"       %% "monix-execution" % monixVersion,
+  "ch.qos.logback" % "logback-classic"  % "1.2.3",
+  "io.monix"       %% "monix"           % monixVersion % Test,
+  "org.scalatest"  %% "scalatest"       % "3.0.5" % Test,
+  "org.scalacheck" %% "scalacheck"      % "1.14.0" % Test
 )
 
 val flagsFor11 = Seq(
