@@ -1,14 +1,9 @@
 val currentScalaVersion = "2.11.12"
-val monixVersion        = "3.0.0-RC2-SNAPSHOT-9e79718-SNAPSHOT"
+val monixVersion        = "3.0.0-RC3"
 
 name := "monix-mdc"
 
 description := "Monix support for MDC using TaskLocal"
-
-updateOptions := updateOptions.value.withLatestSnapshots(false)
-
-resolvers +=
-  "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
 scalaVersion := "2.11.12"
 
