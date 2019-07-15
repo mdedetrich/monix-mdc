@@ -67,7 +67,8 @@ class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC {
       val task = Task.gather(tasks)
 
       task.runToFutureOpt.map { retrievedValues =>
-        retrievedValues shouldBe keyMultipleValues.values
+        retrievedValues.size shouldBe keyMultipleValues.values.size
+        retrievedValues.toSet shouldBe keyMultipleValues.values.toSet
       }
     }
 
@@ -93,7 +94,8 @@ class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC {
       val task = Task.gather(tasks)
 
       task.runToFutureOpt.map { retrievedValues =>
-        retrievedValues shouldBe keyMultipleValues.values
+        retrievedValues.size shouldBe keyMultipleValues.values.size
+        retrievedValues.toSet shouldBe keyMultipleValues.values.toSet
       }
     }
   }

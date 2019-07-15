@@ -1,6 +1,5 @@
 import monix.eval.Task
 import monix.execution.Scheduler
-import monix.execution.schedulers.TracingScheduler
 import org.scalatest.{AsyncWordSpec, Matchers}
 import org.slf4j.MDC
 
@@ -39,7 +38,8 @@ class MDCBasicSpec extends AsyncWordSpec with Matchers with InitializeMDC {
       val task = Task.gather(tasks)
 
       task.runToFutureOpt.map { retrievedKeyValues =>
-        retrievedKeyValues shouldBe keyValues.keysAndValues.map(_.value)
+        retrievedKeyValues.size shouldBe keyValues.keysAndValues.size
+        retrievedKeyValues.toSet shouldBe keyValues.keysAndValues.map(_.value).toSet
       }
     }
 
@@ -53,7 +53,8 @@ class MDCBasicSpec extends AsyncWordSpec with Matchers with InitializeMDC {
       val task = Task.gather(tasks)
 
       task.runToFutureOpt.map { retrievedValues =>
-        retrievedValues shouldBe keyMultipleValues.values
+        retrievedValues.size shouldBe keyMultipleValues.values.size
+        retrievedValues.toSet shouldBe keyMultipleValues.values.toSet
       }
     }
 
