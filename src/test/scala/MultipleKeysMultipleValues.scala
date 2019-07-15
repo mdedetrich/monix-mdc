@@ -6,7 +6,7 @@ object MultipleKeysMultipleValues {
   lazy val multipleKeyValueGenerator: Gen[MultipleKeysMultipleValues] =
     for {
       range     <- Gen.chooseNum(2, 10)
-      keyValues <- Gen.listOfN(range, KeyValue.keyValueGenerator)
+      keyValues <- Gen.listOfN(range, KeyValue.keyValueGenerator).map(_.distinct)
     } yield MultipleKeysMultipleValues(keyValues)
 
   implicit val arbMultipleKeyValue: Arbitrary[MultipleKeysMultipleValues] = Arbitrary(multipleKeyValueGenerator)

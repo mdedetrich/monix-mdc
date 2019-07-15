@@ -100,4 +100,54 @@ class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC {
     }
   }
 
+  def getAndPut(key: String, value: String): Future[String] =
+    for {
+      _ <- Future {
+        MDC.put(key, value)
+      }
+      get <- Future {
+        MDC.get(key)
+      }
+    } yield get
+
+  "Using Future only" can {
+    "Write and get a value" in {
+      val keyValue = KeyValue.keyValueGenerator.sample.get
+
+      val future = getAndPut(keyValue.key, keyValue.value)
+
+      future.map { _ shouldBe keyValue.value }
+    }
+
+    "Write and get different values concurrently" in {
+      val keyValues = MultipleKeysMultipleValues.multipleKeyValueGenerator.sample.get
+
+      val futures = keyValues.keysAndValues.map { keyValue =>
+        getAndPut(keyValue.key, keyValue.value)
+      }
+
+      val future = Future.sequence(futures)
+
+      future.map { retrievedKeyValues =>
+        retrievedKeyValues.size shouldBe keyValues.keysAndValues.size
+        retrievedKeyValues.toSet shouldBe keyValues.keysAndValues.map(_.value).toSet
+      }
+    }
+
+    "Write and get different values concurrently and mixed" in {
+      val keyMultipleValues = KeyMultipleValues.keyMultipleValuesGenerator.sample.get
+
+      val futures = keyMultipleValues.values.map { value =>
+        getAndPut(keyMultipleValues.key, value)
+      }
+
+      val future = Future.sequence(futures)
+
+      future.map { retrievedValues =>
+        retrievedValues.size shouldBe keyMultipleValues.values.size
+        retrievedValues.toSet shouldBe keyMultipleValues.values.toSet
+      }
+    }
+  }
+
 }
