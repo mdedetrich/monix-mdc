@@ -48,5 +48,6 @@ object MonixMDCAdapter {
     val field = classOf[MDC].getDeclaredField("mdcAdapter")
     field.setAccessible(true)
     field.set(null, new MonixMDCAdapter)
+    field.setAccessible(false)
   }
 }
