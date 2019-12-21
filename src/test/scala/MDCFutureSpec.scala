@@ -1,6 +1,7 @@
 import monix.eval.Task
 import monix.execution.schedulers.TracingScheduler
-import org.scalatest.{AsyncWordSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AsyncWordSpec
 import org.slf4j.MDC
 
 import scala.concurrent.{ExecutionContext, Future}
