@@ -1,15 +1,20 @@
 import monix.eval.Task
 import monix.execution.schedulers.TracingScheduler
+import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
 import org.slf4j.MDC
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC {
+class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC with BeforeAndAfter {
   implicit val scheduler: TracingScheduler        = TracingScheduler(ExecutionContext.global)
   override def executionContext: ExecutionContext = scheduler
   implicit val opts: Task.Options                 = Task.defaultOptions.enableLocalContextPropagation
+
+  before {
+    MDC.clear()
+  }
 
   "Mixing Task with Future" can {
     "Write with Task and get in Future" in {
@@ -29,6 +34,21 @@ class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC {
       task.runToFutureOpt.map { _ shouldBe keyValue.value }
     }
 
+    "Write with Task and get in Future inside Future for comprehension" in {
+      val keyValue = KeyValue.keyValueGenerator.sample.get
+
+      val future = for {
+        _ <- Task {
+              MDC.put(keyValue.key, keyValue.value)
+            }.runToFutureOpt
+        get <- Future {
+                MDC.get(keyValue.key)
+              }
+      } yield get
+
+      future.map { _ shouldBe keyValue.value }
+    }
+
     "Write with Future and get in Task" in {
       val keyValue = KeyValue.keyValueGenerator.sample.get
 
@@ -45,70 +65,16 @@ class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC {
 
       task.runToFutureOpt.map { _ shouldBe keyValue.value }
     }
-
-    "Write and get different values concurrently and mixed with Future first" in {
-      val keyMultipleValues = KeyMultipleValues.keyMultipleValuesGenerator.sample.get
-
-      def getAndPut(key: String, value: String): Task[String] =
-        for {
-          _ <- Task.deferFuture {
-                Future {
-                  MDC.put(key, value)
-                }
-              }
-          get <- Task {
-                  MDC.get(key)
-                }
-        } yield get
-
-      val tasks = keyMultipleValues.values.map { value =>
-        getAndPut(keyMultipleValues.key, value).executeAsync
-      }
-
-      val task = Task.gather(tasks)
-
-      task.runToFutureOpt.map { retrievedValues =>
-        retrievedValues.size shouldBe keyMultipleValues.values.size
-        retrievedValues.toSet shouldBe keyMultipleValues.values.toSet
-      }
-    }
-
-    "Write and get different values concurrently and mixed with Future second" in {
-      val keyMultipleValues = KeyMultipleValues.keyMultipleValuesGenerator.sample.get
-
-      def getAndPut(key: String, value: String): Task[String] =
-        for {
-          _ <- Task {
-                MDC.put(key, value)
-              }
-          get <- Task.deferFuture {
-                  Future {
-                    MDC.get(key)
-                  }
-                }
-        } yield get
-
-      val tasks = keyMultipleValues.values.map { value =>
-        getAndPut(keyMultipleValues.key, value).executeAsync
-      }
-
-      val task = Task.gather(tasks)
-
-      task.runToFutureOpt.map { retrievedValues =>
-        retrievedValues.size shouldBe keyMultipleValues.values.size
-        retrievedValues.toSet shouldBe keyMultipleValues.values.toSet
-      }
-    }
   }
 
   def getAndPut(key: String, value: String): Future[String] =
     for {
       _ <- Future {
-        MDC.put(key, value)
-      }
+            MDC.put(key, value)
+          }
       get <- Future {
-        MDC.get(key)
-      }
+              MDC.get(key)
+            }
     } yield get
 
   "Using Future only" can {
@@ -131,22 +97,7 @@ class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC {
 
       future.map { retrievedKeyValues =>
         retrievedKeyValues.size shouldBe keyValues.keysAndValues.size
-        retrievedKeyValues.toSet shouldBe keyValues.keysAndValues.map(_.value).toSet
-      }
-    }
-
-    "Write and get different values concurrently and mixed" in {
-      val keyMultipleValues = KeyMultipleValues.keyMultipleValuesGenerator.sample.get
-
-      val futures = keyMultipleValues.values.map { value =>
-        getAndPut(keyMultipleValues.key, value)
-      }
-
-      val future = Future.sequence(futures)
-
-      future.map { retrievedValues =>
-        retrievedValues.size shouldBe keyMultipleValues.values.size
-        retrievedValues.toSet shouldBe keyMultipleValues.values.toSet
+        retrievedKeyValues shouldBe keyValues.keysAndValues.map(_.value)
       }
     }
   }
