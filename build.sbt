@@ -75,3 +75,7 @@ scalacOptions ++= {
       flagsFor11
   }
 }
+
+// Since our tests are using a global MDC context and the tests clear the context inbetween runs,
+// we need to run them synchronously
+parallelExecution in Test in ThisBuild := false
