@@ -39,7 +39,13 @@ uses reflection to achieve this. This can cause other issues (see the [limitatio
 
 ### Interopt with Future
 
-If you want to interopt with MDC usage within Scala `Future` you can also use the
-Monix `TracingScheduler` which means that you can freely use MDC both within `Task` or `Future`.
-You just need to make sure that you use the same `TracingScheduler` for all `Future` operations
-(as well as when running `runToFuture` on your `Task`)
+If you are mixing usage of `Future` with `Task` (i.e. freely using MDC both within `Task` or `Future`)
+you also should `disableLocalContextIsolateOnRun`, here are the ways of doing his. Note that this requires
+at least Monix 3.2.0
+
+* You can import the `Task.defaultOptions.enableLocalContextPropagation.disableLocalContextIsolateOnRun` implicit anduse `runToFutureOpt`
+* Applying a transformation `.executeWithOptions(_.enableLocalContextPropagation.disableLocalContextIsolateOnRun)` on each Task that uses a Local
+* Setting system property `monix.environment.disableLocalContextIsolateOnRun` to 1
+
+You also need to use the Monix `TracingScheduler`, just make sure that you use the same `TracingScheduler` for all `Future` operations
+(as well as when running `runToFuture`/`runToFutureOpt` on your `Task`)

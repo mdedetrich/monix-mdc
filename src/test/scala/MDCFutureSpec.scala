@@ -1,4 +1,5 @@
 import monix.eval.Task
+import monix.execution.misc.Local
 import monix.execution.schedulers.TracingScheduler
 import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.should.Matchers
@@ -10,7 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC with BeforeAndAfter {
   implicit val scheduler: TracingScheduler        = TracingScheduler(ExecutionContext.global)
   override def executionContext: ExecutionContext = scheduler
-  implicit val opts: Task.Options                 = Task.defaultOptions.enableLocalContextPropagation
+  implicit val opts: Task.Options                 = Task.defaultOptions.enableLocalContextPropagation.disableLocalContextIsolateOnRun
 
   before {
     MDC.clear()
@@ -90,7 +91,7 @@ class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC with 
       val keyValues = MultipleKeysMultipleValues.multipleKeyValueGenerator.sample.get
 
       val futures = keyValues.keysAndValues.map { keyValue =>
-        getAndPut(keyValue.key, keyValue.value)
+        Local.isolate(getAndPut(keyValue.key, keyValue.value))
       }
 
       val future = Future.sequence(futures)

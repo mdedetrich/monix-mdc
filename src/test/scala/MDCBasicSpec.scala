@@ -1,4 +1,4 @@
-import monix.eval.Task
+import monix.eval.{Task, TaskLocal}
 import monix.execution.Scheduler
 import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.should.Matchers
@@ -10,7 +10,7 @@ import scala.concurrent.ExecutionContext
 class MDCBasicSpec extends AsyncWordSpec with Matchers with InitializeMDC with BeforeAndAfter {
   implicit val scheduler: Scheduler               = Scheduler.global
   override def executionContext: ExecutionContext = scheduler
-  implicit val opts: Task.Options                 = Task.defaultOptions.enableLocalContextPropagation
+  implicit val opts: Task.Options                 = Task.defaultOptions.enableLocalContextPropagation.disableLocalContextIsolateOnRun
 
   before {
     MDC.clear()
@@ -38,10 +38,10 @@ class MDCBasicSpec extends AsyncWordSpec with Matchers with InitializeMDC with B
       val keyValues = MultipleKeysMultipleValues.multipleKeyValueGenerator.sample.get
 
       val tasks = keyValues.keysAndValues.map { keyValue =>
-        getAndPut(keyValue.key, keyValue.value).executeAsync
+        TaskLocal.isolate(getAndPut(keyValue.key, keyValue.value).executeAsync)
       }
 
-      val task = Task.gather(tasks)
+      val task = Task.parSequence(tasks)
 
       task.runToFutureOpt.map { retrievedKeyValues =>
         retrievedKeyValues.size shouldBe keyValues.keysAndValues.size
