@@ -10,7 +10,7 @@ description := "Monix support for MDC using TaskLocal"
 
 scalaVersion := currentScalaVersion
 
-crossScalaVersions := Seq(currentScalaVersion, "2.12.10", "2.11.12")
+crossScalaVersions := Seq(currentScalaVersion, "2.12.11", "2.11.12")
 
 scalacOptions in Test in ThisBuild ++= Seq("-Yrangepos")
 
