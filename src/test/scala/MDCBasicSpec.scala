@@ -10,7 +10,7 @@ import scala.concurrent.ExecutionContext
 class MDCBasicSpec extends AsyncWordSpec with Matchers with InitializeMDC with BeforeAndAfter {
   implicit val scheduler: Scheduler               = Scheduler.global
   override def executionContext: ExecutionContext = scheduler
-  implicit val opts: Task.Options                 = Task.defaultOptions.enableLocalContextPropagation.disableLocalContextIsolateOnRun
+  implicit val opts: Task.Options                 = Task.defaultOptions.enableLocalContextPropagation
 
   before {
     MDC.clear()

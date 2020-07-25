@@ -1,6 +1,6 @@
-val currentScalaVersion = "2.13.1"
-val monixVersion        = "3.1.0"
-val monixTestVersion    = "3.2.0-4524fe2-SNAPSHOT"
+val currentScalaVersion = "2.13.3"
+val monixVersion        = "3.2.2"
+val monixTestVersion    = "3.3.0-69f970a-SNAPSHOT"
 
 resolvers in ThisBuild += Resolver.sonatypeRepo("snapshots")
 
