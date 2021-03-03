@@ -1,8 +1,5 @@
-val currentScalaVersion = "2.13.1"
-val monixVersion        = "3.1.0"
-val monixTestVersion    = "3.2.0-4524fe2-SNAPSHOT"
-
-resolvers in ThisBuild += Resolver.sonatypeRepo("snapshots")
+val currentScalaVersion = "2.13.5"
+val monixVersion        = "3.3.0"
 
 name := "monix-mdc"
 
@@ -10,7 +7,7 @@ description := "Monix support for MDC using TaskLocal"
 
 scalaVersion := currentScalaVersion
 
-crossScalaVersions := Seq(currentScalaVersion, "2.12.11", "2.11.12")
+crossScalaVersions := Seq("2.12.11", currentScalaVersion)
 
 scalacOptions in Test in ThisBuild ++= Seq("-Yrangepos")
 
@@ -40,18 +37,9 @@ pomIncludeRepository := (_ => false)
 libraryDependencies := Seq(
   "io.monix"       %% "monix-execution" % monixVersion,
   "ch.qos.logback" % "logback-classic"  % "1.2.3",
-  "io.monix"       %% "monix"           % monixTestVersion % Test,
+  "io.monix"       %% "monix"           % monixVersion % Test,
   "org.scalatest"  %% "scalatest"       % "3.1.0" % Test,
   "org.scalacheck" %% "scalacheck"      % "1.14.0" % Test
-)
-
-val flagsFor11 = Seq(
-  "-Xlint:_",
-  "-Yconst-opt",
-  "-Ywarn-infer-any",
-  "-Yclosure-elim",
-  "-Ydead-code",
-  "-Xsource:2.12" // required to build case class construction
 )
 
 val flagsFor12 = Seq(
@@ -71,8 +59,6 @@ scalacOptions ++= {
       flagsFor13
     case Some((2, n)) if n == 12 =>
       flagsFor12
-    case Some((2, n)) if n == 11 =>
-      flagsFor11
   }
 }
 
