@@ -19,11 +19,11 @@ class MDCBasicSpec extends AsyncWordSpec with Matchers with InitializeMDC with B
   def getAndPut(key: String, value: String): Task[String] =
     for {
       _ <- Task {
-            MDC.put(key, value)
-          }
+             MDC.put(key, value)
+           }
       get <- Task {
-              MDC.get(key)
-            }
+               MDC.get(key)
+             }
     } yield get
 
   "Task with MDC" can {
@@ -31,7 +31,7 @@ class MDCBasicSpec extends AsyncWordSpec with Matchers with InitializeMDC with B
       val keyValue = KeyValue.keyValueGenerator.sample.get
 
       val task = getAndPut(keyValue.key, keyValue.value)
-      task.runToFutureOpt.map { _ shouldBe keyValue.value }
+      task.runToFutureOpt.map(_ shouldBe keyValue.value)
     }
 
     "Write and get different values concurrently" in {

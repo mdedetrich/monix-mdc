@@ -36,8 +36,7 @@ class MonixMDCAdapter extends LogbackMDCAdapter {
 
 object MonixMDCAdapter {
 
-  /**
-    * Initializes the [[MonixMDCAdapter]] by overriding the default MDCAdaptor. Typically
+  /** Initializes the [[MonixMDCAdapter]] by overriding the default MDCAdaptor. Typically
     * you would call this once in your Main (or equivalent).
     *
     * NOTE: This will override the default MDCAdaptor which means that MDC will no longer

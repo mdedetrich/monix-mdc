@@ -36,10 +36,10 @@ pomIncludeRepository := (_ => false)
 
 libraryDependencies := Seq(
   "io.monix"       %% "monix-execution" % monixVersion,
-  "ch.qos.logback" % "logback-classic"  % "1.2.3",
+  "ch.qos.logback"  % "logback-classic" % "1.2.3",
   "io.monix"       %% "monix"           % monixVersion % Test,
-  "org.scalatest"  %% "scalatest"       % "3.1.0" % Test,
-  "org.scalacheck" %% "scalacheck"      % "1.14.0" % Test
+  "org.scalatest"  %% "scalatest"       % "3.1.0"      % Test,
+  "org.scalacheck" %% "scalacheck"      % "1.14.0"     % Test
 )
 
 val flagsFor12 = Seq(

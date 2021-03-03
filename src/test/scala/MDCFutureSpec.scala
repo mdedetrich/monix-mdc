@@ -23,16 +23,16 @@ class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC with 
 
       val task = for {
         _ <- Task {
-              MDC.put(keyValue.key, keyValue.value)
-            }
+               MDC.put(keyValue.key, keyValue.value)
+             }
         get <- Task.fromFuture {
-                Future {
-                  MDC.get(keyValue.key)
-                }
-              }
+                 Future {
+                   MDC.get(keyValue.key)
+                 }
+               }
       } yield get
 
-      task.runToFutureOpt.map { _ shouldBe keyValue.value }
+      task.runToFutureOpt.map(_ shouldBe keyValue.value)
     }
 
     "Write with Task and get in Future inside Future for comprehension" in {
@@ -40,14 +40,14 @@ class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC with 
 
       val future = for {
         _ <- Task {
-              MDC.put(keyValue.key, keyValue.value)
-            }.runToFutureOpt
+               MDC.put(keyValue.key, keyValue.value)
+             }.runToFutureOpt
         get <- Future {
-                MDC.get(keyValue.key)
-              }
+                 MDC.get(keyValue.key)
+               }
       } yield get
 
-      future.map { _ shouldBe keyValue.value }
+      future.map(_ shouldBe keyValue.value)
     }
 
     "Write with Future and get in Task" in {
@@ -55,27 +55,27 @@ class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC with 
 
       val task = for {
         _ <- Task.deferFuture {
-              Future {
-                MDC.put(keyValue.key, keyValue.value)
-              }
-            }
+               Future {
+                 MDC.put(keyValue.key, keyValue.value)
+               }
+             }
         get <- Task {
-                MDC.get(keyValue.key)
-              }
+                 MDC.get(keyValue.key)
+               }
       } yield get
 
-      task.runToFutureOpt.map { _ shouldBe keyValue.value }
+      task.runToFutureOpt.map(_ shouldBe keyValue.value)
     }
   }
 
   def getAndPut(key: String, value: String): Future[String] =
     for {
       _ <- Future {
-            MDC.put(key, value)
-          }
+             MDC.put(key, value)
+           }
       get <- Future {
-              MDC.get(key)
-            }
+               MDC.get(key)
+             }
     } yield get
 
   "Using Future only" can {
@@ -84,7 +84,7 @@ class MDCFutureSpec extends AsyncWordSpec with Matchers with InitializeMDC with 
 
       val future = getAndPut(keyValue.key, keyValue.value)
 
-      future.map { _ shouldBe keyValue.value }
+      future.map(_ shouldBe keyValue.value)
     }
 
     "Write and get different values concurrently" in {
